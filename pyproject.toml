@@ -1,0 +1,9 @@
+[project]
+name = "django-game-collection"
+version = "0.1.0"
+description = "Game Collaction"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "django>=6.1.1",
+]
