@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ game.name }} — GameHub{% endblock %}
+
+{% block content %}
+    <a href="{% url 'game_list' %}" class="btn" style="margin-bottom: 24px;">&larr; Назад до списку</a>
+
+    <div class="card" style="margin-bottom: 32px; border-color: rgba(99, 102, 241, 0.4); box-shadow: 0 0 25px var(--primary-glow);">
+        <h1 style="margin-bottom: 12px;">{{ game.name }}</h1>
+        <div style="margin-top: 10px;">
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 8px; font-weight: 500;">
+                ДОСТУПНО НА ПЛАТФОРМАХ:
+            </p>
+            {% for platform in game.platforms.all %}
+                <span class="badge-platform">{{ platform.name }}</span>
+            {% empty %}
+                <span style="color: var(--text-muted); font-style: italic;">Платформ не вказано.</span>
+            {% endfor %}
+        </div>
+    </div>
+
+    <h2 style="font-size: 1.3rem; margin-bottom: 16px; color: #fff;">
+        Відгуки та проходження ({{ game.reviews.count }})
+    </h2>
+
+    {% for review in game.reviews.all %}
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 10px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span class="rating-badge">★ {{ review.rating }}/10</span>
+                    <span class="badge-status status-{{ review.status }}">
+                        {{ review.get_status_display }}
+                    </span>
+                </div>
+                <small style="color: var(--text-muted); font-size: 0.8rem;">
+                    {{ review.created_at|date:"d.m.Y H:i" }}
+                </small>
+            </div>
+
+            {% if review.comment %}
+                <p style="color: #cbd5e1; font-size: 0.95rem;">{{ review.comment }}</p>
+            {% else %}
+                <p style="color: var(--text-muted); font-style: italic; font-size: 0.9rem;">
+                    Без текстового коментаря.
+                </p>
+            {% endif %}
+        </div>
+    {% empty %}
+        <div class="empty-box">
+            <p>До цієї гри ще немає відгуків або записів про проходження.</p>
+        </div>
+    {% endfor %}
+{% endblock %}

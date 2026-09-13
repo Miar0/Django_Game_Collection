@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Всі ігри — GameHub{% endblock %}
+
+{% block content %}
+    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 20px;">
+        <h1>Каталог ігор</h1>
+        <span style="color: var(--text-muted); font-size: 0.9rem;">Всього: {{ games.count }}</span>
+    </div>
+
+    {% for game in games %}
+        <div class="card card-interactive">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;">
+                <div>
+                    <a href="{% url 'game_detail' game.pk %}" class="title-link">{{ game.name }}</a>
+                    <div style="margin-top: 8px;">
+                        {% for platform in game.platforms.all %}
+                            <span class="badge-platform">{{ platform.name }}</span>
+                        {% empty %}
+                            <span style="color: var(--text-muted); font-size: 0.85rem;">Платформи не вказано</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                <a href="{% url 'game_detail' game.pk %}" class="btn" style="padding: 6px 12px; font-size: 0.85rem;">
+                    Детальніше &rarr;
+                </a>
+            </div>
+        </div>
+    {% empty %}
+        <div class="empty-box">
+            <p style="font-size: 1.1rem; margin-bottom: 6px;">🎮 Ігор поки що немає</p>
+            <p style="font-size: 0.9rem;">Додайте кілька ігор через Django адмінку.</p>
+        </div>
+    {% endfor %}
+{% endblock %}
