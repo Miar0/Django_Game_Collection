@@ -6,7 +6,8 @@
     <title>{% block title %}GameHub{% endblock %}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+          rel="stylesheet">
     <style>
         :root {
             --bg: #0f172a;
@@ -16,10 +17,13 @@
             --text: #f8fafc;
             --text-muted: #94a3b8;
             --primary: #6366f1;
+            --primary-hover: #4f46e5;
             --primary-glow: rgba(99, 102, 241, 0.25);
             --accent: #38bdf8;
             --success: #10b981;
             --warning: #f59e0b;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
         }
 
         * {
@@ -39,7 +43,7 @@
         }
 
         .container {
-            max-width: 900px;
+            max-width: 960px;
             margin: 0 auto;
             padding: 24px 20px;
             width: 100%;
@@ -58,7 +62,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            max-width: 900px;
+            max-width: 960px;
             margin: 0 auto;
             padding: 16px 20px;
         }
@@ -78,7 +82,7 @@
 
         nav {
             display: flex;
-            gap: 12px;
+            gap: 8px;
         }
 
         nav a {
@@ -97,9 +101,8 @@
         }
 
         h1 {
-            font-size: 2rem;
+            font-size: 1.85rem;
             font-weight: 700;
-            margin-bottom: 24px;
             color: #fff;
             letter-spacing: -0.02em;
         }
@@ -145,30 +148,6 @@
             margin-top: 6px;
         }
 
-        .badge-status {
-            display: inline-block;
-            font-size: 0.75rem;
-            font-weight: 600;
-            padding: 3px 8px;
-            border-radius: 6px;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-        }
-
-        .status-planned { background: rgba(148, 163, 184, 0.2); color: #cbd5e1; }
-        .status-playing { background: rgba(99, 102, 241, 0.25); color: #a5b4fc; }
-        .status-completed { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; }
-        .status-abandoned { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
-
-        .rating-badge {
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: white;
-            font-weight: 700;
-            font-size: 0.85rem;
-            padding: 3px 8px;
-            border-radius: 6px;
-        }
-
         .empty-box {
             background: var(--surface);
             border: 1px dashed var(--border);
@@ -178,27 +157,21 @@
             color: var(--text-muted);
         }
 
-        .counter-footer {
-            margin-top: 24px;
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
+        /* Кнопки */
         .btn {
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 8px;
-            padding: 10px 18px;
+            padding: 8px 14px;
             border-radius: 8px;
             background: var(--surface);
             color: var(--text);
             text-decoration: none;
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             font-weight: 500;
             border: 1px solid var(--border);
+            cursor: pointer;
             transition: all 0.2s ease;
         }
 
@@ -206,21 +179,309 @@
             background: var(--surface-hover);
             color: #fff;
         }
+
+        .btn-primary {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            border-color: var(--primary-hover);
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+        }
+
+        .btn-danger:hover {
+            background: var(--danger);
+            border-color: var(--danger);
+            color: #fff;
+        }
+
+        /* Панель фільтрів */
+        .filter-panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 24px;
+            display: grid;
+            grid-template-columns: 2fr 1.5fr 1fr auto;
+            gap: 12px;
+            align-items: end;
+        }
+
+        @media (max-width: 768px) {
+            .filter-panel {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .input-control {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s ease;
+            width: 100%;
+        }
+
+        .input-control:focus {
+            border-color: var(--accent);
+        }
+
+        /* Пагінація */
+        .pagination-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 28px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .pagination-nav {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pagination-nav a, .pagination-nav span.current {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            text-decoration: none;
+            color: var(--text);
+            border: 1px solid var(--border);
+            background: var(--surface);
+        }
+
+        .pagination-nav span.current {
+            background: var(--primary);
+            border-color: var(--primary);
+            font-weight: 600;
+        }
+
+        .pagination-nav a:hover {
+            background: var(--surface-hover);
+        }
+
+        /* Повідомлення Django Messages */
+        .alerts {
+            margin-bottom: 20px;
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #6ee7b7;
+        }
+
+        .form-field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 18px;
+        }
+
+        .form-label {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .form-label span.required {
+            color: var(--danger);
+        }
+
+        /* Стилізація стандартних віджетів Django через спільний контейнер */
+        .form-field input[type="text"],
+        .form-field input[type="number"],
+        .form-field select,
+        .form-field textarea {
+            background-color: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            width: 100%;
+        }
+
+        .form-field textarea {
+            min-height: 110px;
+            resize: vertical;
+        }
+
+        .form-field select[multiple] {
+            min-height: 120px;
+            padding: 8px;
+        }
+
+        .form-field select[multiple] option {
+            padding: 6px 10px;
+            border-radius: 4px;
+            margin-bottom: 2px;
+        }
+
+        .form-field input:focus,
+        .form-field select:focus,
+        .form-field textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+        }
+
+        /* Підказки та помилки */
+        .form-help {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .form-error {
+            color: var(--danger);
+            font-size: 0.82rem;
+            font-weight: 500;
+            margin-top: 4px;
+        }
+
+        .non-field-errors {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 18px;
+            font-size: 0.9rem;
+        }
+
+        /* Базовий бейдж оцінки з заокругленням */
+        .rating-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 700;
+            font-size: 0.82rem;
+            padding: 3px 10px;
+            border-radius: 9999px; /* повне округлення pill */
+            color: #fff;
+        }
+
+        /* Кольори оцінки залежно від бала */
+        .rating-low {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            color: #fca5a5;
+        }
+
+        .rating-medium {
+            background: rgba(245, 158, 11, 0.2);
+            border: 1px solid rgba(245, 158, 11, 0.4);
+            color: #fcd34d;
+        }
+
+        .rating-high {
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: #6ee7b7;
+        }
+
+        /* Округлений бейдж статусу з виразними кольорами */
+        .badge-status {
+            display: inline-flex;
+            align-items: center;
+            font-size: 0.78rem;
+            font-weight: 600;
+            padding: 3px 12px;
+            border-radius: 9999px; /* округлення */
+            border: 1px solid transparent;
+        }
+
+        /* В планах */
+        .status-planned {
+            background: rgba(148, 163, 184, 0.15);
+            color: #cbd5e1;
+            border-color: rgba(148, 163, 184, 0.3);
+        }
+
+        /* Граю */
+        .status-playing {
+            background: rgba(99, 102, 241, 0.2);
+            color: #a5b4fc;
+            border-color: rgba(99, 102, 241, 0.35);
+        }
+
+        /* Пройдено */
+        .status-completed {
+            background: rgba(16, 185, 129, 0.2);
+            color: #6ee7b7;
+            border-color: rgba(16, 185, 129, 0.35);
+        }
+
+        /* Покинуто */
+        .status-abandoned {
+            background: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+            border-color: rgba(239, 68, 68, 0.35);
+        }
     </style>
 </head>
 <body>
-    <header>
-        <div class="nav-wrapper">
-            <a href="{% url 'game_list' %}" class="logo">⚡ GameHub</a>
-            <nav>
-                <a href="{% url 'game_list' %}">🎮 Ігри</a>
-                <a href="{% url 'platform_list' %}">💻 Платформи</a>
-            </nav>
-        </div>
-    </header>
+<header>
+    <div class="nav-wrapper">
+        <a href="{% url 'game_list' %}" class="logo">⚡ GameHub</a>
+        <nav>
+            <a href="{% url 'game_list' %}">🎮 Ігри</a>
+            <a href="{% url 'platform_list' %}">💻 Платформи</a>
+            <a href="{% url 'game_create' %}" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.85rem;">+
+                Нова гра</a>
+        </nav>
+    </div>
+</header>
 
-    <main class="container">
-        {% block content %}{% endblock %}
-    </main>
+<main class="container">
+    {% if messages %}
+    <div class="alerts">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+</main>
 </body>
 </html>

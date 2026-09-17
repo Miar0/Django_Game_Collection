@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% block title %}Каталог ігор — GameHub{% endblock %}
+
+{% block content %}
+    <!-- Верхня панель заголовка з лічильником та діями -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+        <div>
+            <h1>Каталог ігор</h1>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">
+                Всього в базі: <strong>{{ paginator.count|default:games.count }}</strong>
+            </p>
+        </div>
+        <div style="display: flex; gap: 8px;">
+            <a href="{% url 'game_create' %}" class="btn btn-primary">+ Додати гру</a>
+        </div>
+    </div>
+
+    <!-- Панель гнучкої фільтрації та пошуку -->
+    <form method="get" action="{% url 'game_filter' %}" class="filter-panel">
+        <div class="form-group">
+            <label for="id_q">Пошук за назвою</label>
+            <input
+                type="text"
+                name="q"
+                id="id_q"
+                class="input-control"
+                placeholder="Введіть назву гри..."
+                value="{{ request.GET.q|default:'' }}"
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="id_platform">Платформа</label>
+            <select name="platform" id="id_platform" class="input-control">
+                <option value="">Всі платформи</option>
+                {% for p in all_platforms %}
+                    <option value="{{ p.id }}" {% if request.GET.platform == p.id|stringformat:"i" %}selected{% endif %}>
+                        {{ p.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="id_min_rating">Мін. рейтинг</label>
+            <select name="min_rating" id="id_min_rating" class="input-control">
+                <option value="">Будь-який</option>
+                <option value="5" {% if request.GET.min_rating == '5' %}selected{% endif %}>5+ ★</option>
+                <option value="7" {% if request.GET.min_rating == '7' %}selected{% endif %}>7+ ★</option>
+                <option value="8" {% if request.GET.min_rating == '8' %}selected{% endif %}>8+ ★ (Топ)</option>
+                <option value="9" {% if request.GET.min_rating == '9' %}selected{% endif %}>9+ ★</option>
+            </select>
+        </div>
+
+        <div style="display: flex; gap: 8px;">
+            <button type="submit" class="btn btn-primary" style="padding: 9px 16px;">Знайти</button>
+            {% if request.GET.q or request.GET.platform or request.GET.min_rating %}
+                <a href="{% url 'game_list' %}" class="btn" title="Скинути фільтри">✕</a>
+            {% endif %}
+        </div>
+    </form>
+
+    <!-- Список ігор -->
+    {% for game in games %}
+        <div class="card card-interactive">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 240px;">
+                    <a href="{% url 'game_detail' game.pk %}" class="title-link">{{ game.name }}</a>
+                    <div style="margin-top: 8px;">
+                        {% for platform in game.platforms.all %}
+                            <span class="badge-platform">{{ platform.name }}</span>
+                        {% empty %}
+                            <span style="color: var(--text-muted); font-size: 0.85rem;">Платформи не вказано</span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Кнопки швидких дій CRUD -->
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <a href="{% url 'game_detail' game.pk %}" class="btn" style="padding: 6px 12px; font-size: 0.82rem;">
+                        Детальніше &rarr;
+                    </a>
+                    <a href="{% url 'game_update' game.pk %}" class="btn" style="padding: 6px 10px; font-size: 0.82rem;" title="Редагувати">
+                        ✎
+                    </a>
+                    <a href="{% url 'game_delete' game.pk %}" class="btn btn-danger" style="padding: 6px 10px; font-size: 0.82rem;" title="Видалити">
+                        🗑
+                    </a>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <div class="empty-box">
+            <p style="font-size: 1.1rem; margin-bottom: 6px;">🎮 Ігор не знайдено</p>
+            <p style="font-size: 0.9rem; margin-bottom: 16px;">
+                {% if request.GET %}
+                    Спробуйте змінити критерії пошуку або скинути фільтри.
+                {% else %}
+                    У вашій бібліотеці ще немає записів.
+                {% endif %}
+            </p>
+            {% if request.GET %}
+                <a href="{% url 'game_list' %}" class="btn">Скинути пошук</a>
+            {% else %}
+                <a href="{% url 'game_create' %}" class="btn btn-primary">+ Створити першу гру</a>
+            {% endif %}
+        </div>
+    {% endfor %}
+
+    <!-- Пагінація -->
+    {% if is_paginated %}
+        <div class="pagination-bar">
+            <div>
+                Сторінка <strong>{{ page_obj.number }}</strong> з <strong>{{ page_obj.paginator.num_pages }}</strong>
+            </div>
+
+            <nav class="pagination-nav">
+                {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.platform %}&platform={{ request.GET.platform }}{% endif %}{% if request.GET.min_rating %}&min_rating={{ request.GET.min_rating }}{% endif %}">
+                        &larr; Назад
+                    </a>
+                {% endif %}
+
+                <span class="current">{{ page_obj.number }}</span>
+
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.platform %}&platform={{ request.GET.platform }}{% endif %}{% if request.GET.min_rating %}&min_rating={{ request.GET.min_rating }}{% endif %}">
+                        Далі &rarr;
+                    </a>
+                {% endif %}
+            </nav>
+        </div>
+    {% endif %}
+{% endblock %}
