@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ game.name }} — GameHub{% endblock %}
+
+{% block content %}
+    <!-- Верхня навігація та дії над грою -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px;">
+        <a href="{% url 'game_list' %}" class="btn">&larr; Назад до списку</a>
+
+        <div style="display: flex; gap: 8px;">
+            <a href="{% url 'game_update' game.pk %}" class="btn">✎ Редагувати гру</a>
+            <a href="{% url 'game_delete' game.pk %}" class="btn btn-danger">🗑 Видалити гру</a>
+        </div>
+    </div>
+
+    <!-- Головна картка гри -->
+    <div class="card" style="margin-bottom: 32px; border-color: rgba(99, 102, 241, 0.4); box-shadow: 0 0 25px var(--primary-glow);">
+        <h1 style="margin-bottom: 12px;">{{ game.name }}</h1>
+        <div style="margin-top: 10px;">
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 8px; font-weight: 500;">
+                ДОСТУПНО НА ПЛАТФОРМАХ:
+            </p>
+            {% for platform in game.platforms.all %}
+                <span class="badge-platform">{{ platform.name }}</span>
+            {% empty %}
+                <span style="color: var(--text-muted); font-style: italic;">Платформ не вказано.</span>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Секція відгуків -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+        <h2 style="font-size: 1.3rem; color: #fff;">
+            Відгуки та проходження ({{ game.reviews.count }})
+        </h2>
+        <a href="{% url 'review_create' game.pk %}" class="btn btn-primary" style="font-size: 0.85rem; padding: 6px 14px;">
+            + Додати відгук
+        </a>
+    </div>
+
+    {% for review in game.reviews.all %}
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <!-- Динамічний клас кольору для рейтингу -->
+                    <span class="rating-badge {% if review.rating <= 4 %}rating-low{% elif review.rating <= 7 %}rating-medium{% else %}rating-high{% endif %}">
+                        ★ {{ review.rating }}/10
+                    </span>
+
+                    <!-- Округлений кольоровий статус -->
+                    <span class="badge-status status-{{ review.status }}">
+                        {{ review.get_status_display }}
+                    </span>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <small style="color: var(--text-muted); font-size: 0.8rem;">
+                        {{ review.created_at|date:"d.m.Y H:i" }}
+                    </small>
+                    <!-- Дії над відгуком -->
+                    <a href="{% url 'review_update' review.pk %}" style="color: var(--text-muted); text-decoration: none; font-size: 0.85rem;" title="Редагувати відгук">✎</a>
+                    <a href="{% url 'review_delete' review.pk %}" style="color: var(--danger); text-decoration: none; font-size: 0.85rem;" title="Видалити відгук">✕</a>
+                </div>
+            </div>
+
+            {% if review.comment %}
+                <p style="color: #cbd5e1; font-size: 0.95rem;">{{ review.comment }}</p>
+            {% else %}
+                <p style="color: var(--text-muted); font-style: italic; font-size: 0.9rem;">
+                    Без текстового коментаря.
+                </p>
+            {% endif %}
+        </div>
+    {% empty %}
+        <div class="empty-box" style="margin-bottom: 32px;">
+            <p style="margin-bottom: 12px;">До цієї гри ще немає відгуків або записів про проходження.</p>
+            <a href="{% url 'review_create' game.pk %}" class="btn btn-primary" style="font-size: 0.85rem;">
+                Написати перший відгук
+            </a>
+        </div>
+    {% endfor %}
+
+    <!-- Блок рекомендацій (вимога ДЗ №6: вивести пов'язані записи через get_context_data) -->
+    {% if related_games %}
+        <div style="margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--border);">
+            <h3 style="font-size: 1.15rem; margin-bottom: 16px; color: #fff;">
+                Схожі ігри на цих платформах:
+            </h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px;">
+                {% for related in related_games %}
+                    <div class="card card-interactive" style="padding: 14px; margin-bottom: 0;">
+                        <a href="{% url 'game_detail' related.pk %}" class="title-link" style="font-size: 1rem; margin-bottom: 6px;">
+                            {{ related.name }}
+                        </a>
+                        <div>
+                            {% for p in related.platforms.all %}
+                                <span class="badge-platform" style="font-size: 0.7rem; padding: 2px 6px;">{{ p.name }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}

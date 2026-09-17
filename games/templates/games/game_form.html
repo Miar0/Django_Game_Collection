@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {% if object %}Редагувати: {{ object.name }}{% else %}Нова гра{% endif %} — GameHub
+{% endblock %}
+
+{% block content %}
+    <div style="max-width: 600px; margin: 0 auto;">
+        <a href="{% if object %}{% url 'game_detail' object.pk %}{% else %}{% url 'game_list' %}{% endif %}" class="btn" style="margin-bottom: 20px;">
+            &larr; Скасувати
+        </a>
+
+        <div class="card" style="padding: 28px;">
+            <h1 style="font-size: 1.6rem; margin-bottom: 20px;">
+                {% if object %}Редагувати гру: {{ object.name }}{% else %}Нова гра{% endif %}
+            </h1>
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="non-field-errors">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                {% for field in form %}
+                    <div class="form-field">
+                        <label for="{{ field.id_for_label }}" class="form-label">
+                            {{ field.label }}
+                            {% if field.field.required %}<span class="required">*</span>{% endif %}
+                        </label>
+
+                        {{ field }}
+
+                        {% if field.help_text %}
+                            <div class="form-help">{{ field.help_text }}</div>
+                        {% endif %}
+
+                        {% for error in field.errors %}
+                            <div class="form-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+
+                <div style="margin-top: 24px; display: flex; gap: 10px;">
+                    <button type="submit" class="btn btn-primary" style="padding: 10px 20px;">
+                        {% if object %}Зберегти зміни{% else %}Додати гру{% endif %}
+                    </button>
+                    <a href="{% if object %}{% url 'game_detail' object.pk %}{% else %}{% url 'game_list' %}{% endif %}" class="btn">
+                        Скасувати
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
