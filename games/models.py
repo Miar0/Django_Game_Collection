@@ -1,5 +1,7 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.urls import reverse
+
 
 class Platform(models.Model):
     name = models.CharField(max_length=100)
@@ -10,6 +12,8 @@ class Platform(models.Model):
     def __str__(self):
         return self.name
 
+    def get_absolute_url(self):
+        return reverse('platform_list')
 
 class Game(models.Model):
     name = models.CharField(max_length=100)
@@ -20,6 +24,9 @@ class Game(models.Model):
 
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        return reverse('game_detail', kwargs={'pk': self.pk})
 
 
 class Review(models.Model):
@@ -46,3 +53,6 @@ class Review(models.Model):
 
     def __str__(self):
         return f"{self.game.name} ({self.get_status_display()}) - {self.rating}/10"
+
+    def get_absolute_url(self):
+        return reverse('game_detail', kwargs={'pk': self.game.pk})
