@@ -11,9 +11,13 @@
                 Всього в базі: <strong>{{ paginator.count|default:games.count }}</strong>
             </p>
         </div>
+
+        <!-- Кнопка створення тільки для персоналу / адміна -->
+        {% if user.is_staff %}
         <div style="display: flex; gap: 8px;">
             <a href="{% url 'game_create' %}" class="btn btn-primary">+ Додати гру</a>
         </div>
+        {% endif %}
     </div>
 
     <!-- Панель гнучкої фільтрації та пошуку -->
@@ -76,17 +80,21 @@
                     </div>
                 </div>
 
-                <!-- Кнопки швидких дій CRUD -->
+                <!-- Кнопки швидких дій -->
                 <div style="display: flex; align-items: center; gap: 8px;">
                     <a href="{% url 'game_detail' game.pk %}" class="btn" style="padding: 6px 12px; font-size: 0.82rem;">
                         Детальніше &rarr;
                     </a>
-                    <a href="{% url 'game_update' game.pk %}" class="btn" style="padding: 6px 10px; font-size: 0.82rem;" title="Редагувати">
-                        ✎
-                    </a>
-                    <a href="{% url 'game_delete' game.pk %}" class="btn btn-danger" style="padding: 6px 10px; font-size: 0.82rem;" title="Видалити">
-                        🗑
-                    </a>
+
+                    <!-- Редагування та видалення доступні тільки адміну/персоналу -->
+                    {% if user.is_staff %}
+                        <a href="{% url 'game_update' game.pk %}" class="btn" style="padding: 6px 10px; font-size: 0.82rem;" title="Редагувати">
+                            ✎
+                        </a>
+                        <a href="{% url 'game_delete' game.pk %}" class="btn btn-danger" style="padding: 6px 10px; font-size: 0.82rem;" title="Видалити">
+                            🗑
+                        </a>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -102,7 +110,7 @@
             </p>
             {% if request.GET %}
                 <a href="{% url 'game_list' %}" class="btn">Скинути пошук</a>
-            {% else %}
+            {% elif user.is_staff %}
                 <a href="{% url 'game_create' %}" class="btn btn-primary">+ Створити першу гру</a>
             {% endif %}
         </div>
