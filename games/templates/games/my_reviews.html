@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+
+{% block title %}Мої відгуки — GameHub{% endblock %}
+
+{% block content %}
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px;">
+        <div>
+            <h1>Мої відгуки та щоденник</h1>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">
+                Всі ігри, які ви оцінили або додали до списку проходження.
+            </p>
+        </div>
+        <a href="{% url 'game_list' %}" class="btn">&larr; Каталог ігор</a>
+    </div>
+
+    <!-- Панель фільтрації та пошуку серед своїх відгуків -->
+    <form method="get" class="filter-panel">
+        <div class="form-group">
+            <label for="id_q">Пошук гри</label>
+            <input
+                type="text"
+                name="q"
+                id="id_q"
+                class="input-control"
+                placeholder="Введіть назву гри..."
+                value="{{ request.GET.q|default:'' }}"
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="id_status">Статус</label>
+            <select name="status" id="id_status" class="input-control">
+                <option value="">Всі статуси</option>
+                {% for value, label in status_choices %}
+                    <option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="id_min_rating">Мін. оцінка</label>
+            <select name="min_rating" id="id_min_rating" class="input-control">
+                <option value="">Будь-яка</option>
+                <option value="5" {% if request.GET.min_rating == '5' %}selected{% endif %}>5+ ★</option>
+                <option value="7" {% if request.GET.min_rating == '7' %}selected{% endif %}>7+ ★</option>
+                <option value="8" {% if request.GET.min_rating == '8' %}selected{% endif %}>8+ ★</option>
+                <option value="9" {% if request.GET.min_rating == '9' %}selected{% endif %}>9+ ★</option>
+            </select>
+        </div>
+
+        <div style="display: flex; gap: 8px;">
+            <button type="submit" class="btn btn-primary" style="padding: 9px 16px;">Знайти</button>
+            {% if request.GET.q or request.GET.status or request.GET.min_rating %}
+                <a href="{% url 'my_reviews' %}" class="btn" title="Скинути фільтри">✕</a>
+            {% endif %}
+        </div>
+    </form>
+
+    <!-- Список відгуків -->
+    {% for review in reviews %}
+        <div class="card card-interactive" style="margin-bottom: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+                <div>
+                    <a href="{% url 'game_detail' review.game.pk %}" class="title-link">
+                        {{ review.game.name }}
+                    </a>
+                    <div style="display: flex; align-items: center; gap: 8px; margin-top: 6px;">
+                        <span class="rating-badge {% if review.rating <= 4 %}rating-low{% elif review.rating <= 7 %}rating-medium{% else %}rating-high{% endif %}">
+                            ★ {{ review.rating }}/10
+                        </span>
+                        <span class="badge-status status-{{ review.status }}">
+                            {{ review.get_status_display }}
+                        </span>
+                    </div>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <small style="color: var(--text-muted); font-size: 0.8rem;">
+                        {{ review.created_at|date:"d.m.Y H:i" }}
+                    </small>
+                    <a href="{% url 'review_update' review.pk %}" class="btn" style="padding: 4px 8px; font-size: 0.8rem;" title="Редагувати">
+                        ✎ Редагувати
+                    </a>
+                    <a href="{% url 'review_delete' review.pk %}" class="btn btn-danger" style="padding: 4px 8px; font-size: 0.8rem;" title="Видалити">
+                        ✕
+                    </a>
+                </div>
+            </div>
+
+            {% if review.comment %}
+                <p style="color: #cbd5e1; font-size: 0.95rem; margin-top: 8px;">{{ review.comment }}</p>
+            {% else %}
+                <p style="color: var(--text-muted); font-style: italic; font-size: 0.88rem; margin-top: 8px;">
+                    Без текстового відгуку.
+                </p>
+            {% endif %}
+        </div>
+    {% empty %}
+        <div class="empty-box">
+            <h2 style="font-size: 1.2rem; color: #fff; margin-bottom: 8px;">
+                {% if request.GET %}
+                    Відгуків за обраними фільтрами не знайдено
+                {% else %}
+                    У вас ще немає відгуків
+                {% endif %}
+            </h2>
+            <p style="margin-bottom: 16px;">
+                {% if request.GET %}
+                    Спробуйте очистити пошуковий запит або змінити значення фільтрів.
+                {% else %}
+                    Оберіть гру з каталогу та поділіться своїми враженнями!
+                {% endif %}
+            </p>
+            {% if request.GET %}
+                <a href="{% url 'my_reviews' %}" class="btn">Скинути пошук</a>
+            {% else %}
+                <a href="{% url 'game_list' %}" class="btn btn-primary">Перейти до ігор</a>
+            {% endif %}
+        </div>
+    {% endfor %}
+
+    <!-- Пагінація зі збереженням GET-параметрів -->
+    {% if is_paginated %}
+        <div class="pagination-bar">
+            <span>Сторінка <strong>{{ page_obj.number }}</strong> з <strong>{{ page_obj.paginator.num_pages }}</strong></span>
+            <div class="pagination-nav">
+                {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.min_rating %}&min_rating={{ request.GET.min_rating }}{% endif %}">&larr;</a>
+                {% endif %}
+
+                <span class="current">{{ page_obj.number }}</span>
+
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.min_rating %}&min_rating={{ request.GET.min_rating }}{% endif %}">&rarr;</a>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}

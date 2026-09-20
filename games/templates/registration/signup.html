@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}Реєстрація — GameHub{% endblock %}
+
+{% block content %}
+<div style="max-width: 480px; margin: 40px auto;">
+    <div class="card">
+        <h1 style="font-size: 1.5rem; margin-bottom: 8px;">Створити акаунт</h1>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 24px;">
+            Приєднуйтесь до спільноти геймерів GameHub.
+        </p>
+
+        {% if form.non_field_errors %}
+            <div class="non-field-errors">
+                {% for error in form.non_field_errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+
+            {% for field in form %}
+                <div class="form-field">
+                    <label class="form-label" for="{{ field.id_for_label }}">
+                        {{ field.label }}
+                        {% if field.field.required %}<span class="required">*</span>{% endif %}
+                    </label>
+
+                    {{ field }}
+
+                    {% if field.help_text %}
+                        <small class="form-help">{{ field.help_text|safe }}</small>
+                    {% endif %}
+
+                    {% for error in field.errors %}
+                        <div class="form-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 10px; margin-top: 10px;">
+                Зареєструватися
+            </button>
+        </form>
+
+        <p style="text-align: center; margin-top: 20px; font-size: 0.9rem; color: var(--text-muted);">
+            Вже є акаунт? 
+            <a href="{% url 'login' %}" style="color: var(--accent); text-decoration: none;">Увійти</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

@@ -8,7 +8,11 @@
             <h1>Ігрові платформи</h1>
             <p style="color: var(--text-muted); font-size: 0.9rem;">Всього платформ: {{ platforms.count }}</p>
         </div>
-        <a href="{% url 'platform_create' %}" class="btn btn-primary">+ Додати платформу</a>
+
+        <!-- Кнопка створення доступна тільки адміну -->
+        {% if user.is_staff %}
+            <a href="{% url 'platform_create' %}" class="btn btn-primary">+ Додати платформу</a>
+        {% endif %}
     </div>
 
     <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px;">
@@ -25,15 +29,20 @@
                     </p>
                 </div>
 
-                <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.06);">
-                    <a href="{% url 'platform_update' platform.pk %}" class="btn" style="padding: 4px 10px; font-size: 0.8rem;">✎ Змінити</a>
-                    <a href="{% url 'platform_delete' platform.pk %}" class="btn btn-danger" style="padding: 4px 10px; font-size: 0.8rem;">🗑</a>
-                </div>
+                <!-- Панель керування платформою (тільки для адміна) -->
+                {% if user.is_staff %}
+                    <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.06);">
+                        <a href="{% url 'platform_update' platform.pk %}" class="btn" style="padding: 4px 10px; font-size: 0.8rem;">✎ Змінити</a>
+                        <a href="{% url 'platform_delete' platform.pk %}" class="btn btn-danger" style="padding: 4px 10px; font-size: 0.8rem;">🗑</a>
+                    </div>
+                {% endif %}
             </div>
         {% empty %}
             <div class="empty-box" style="grid-column: 1 / -1;">
                 <p style="margin-bottom: 12px;">Платформ ще не додано.</p>
-                <a href="{% url 'platform_create' %}" class="btn btn-primary">+ Створити першу платформу</a>
+                {% if user.is_staff %}
+                    <a href="{% url 'platform_create' %}" class="btn btn-primary">+ Створити першу платформу</a>
+                {% endif %}
             </div>
         {% endfor %}
     </div>

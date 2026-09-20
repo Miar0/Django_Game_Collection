@@ -327,6 +327,7 @@
 
         /* Стилізація стандартних віджетів Django через спільний контейнер */
         .form-field input[type="text"],
+        .form-field input[type="password"],
         .form-field input[type="number"],
         .form-field select,
         .form-field textarea {
@@ -340,6 +341,18 @@
             outline: none;
             transition: border-color 0.2s ease, box-shadow 0.2s ease;
             width: 100%;
+        }
+
+        /* Оформлення списків вимог до пароля (ul / li) */
+        .form-help ul {
+            margin: 8px 0 0 18px;
+            padding: 0;
+        }
+
+        .form-help li {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 3px;
         }
 
         .form-field textarea {
@@ -463,11 +476,33 @@
 <header>
     <div class="nav-wrapper">
         <a href="{% url 'game_list' %}" class="logo">⚡ GameHub</a>
-        <nav>
+        <nav style="display: flex; align-items: center; gap: 8px;">
             <a href="{% url 'game_list' %}">🎮 Ігри</a>
             <a href="{% url 'platform_list' %}">💻 Платформи</a>
+
+            {% if user.is_authenticated %}
+            <a href="{% url 'my_reviews' %}">📝 Мої відгуки</a>
+
+            {% if user.is_staff %}
             <a href="{% url 'game_create' %}" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.85rem;">+
                 Нова гра</a>
+            {% endif %}
+
+            <span style="color: var(--text-muted); font-size: 0.9rem; margin-left: 8px;">
+                    👤 {{ user.username }}
+                </span>
+
+            <!-- Вихід виключно через POST форму -->
+            <form method="post" action="{% url 'logout' %}" style="display: inline; margin: 0;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger" style="padding: 6px 12px; font-size: 0.85rem;">
+                    Вийти
+                </button>
+            </form>
+            {% else %}
+            <a href="{% url 'login' %}">Увійти</a>
+            <a href="{% url 'signup' %}" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.85rem;">Реєстрація</a>
+            {% endif %}
         </nav>
     </div>
 </header>
