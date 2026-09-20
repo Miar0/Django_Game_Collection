@@ -1,3 +1,5 @@
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db.models import Avg, Count
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
@@ -26,6 +28,25 @@ from .models import Game, Platform, Review
 # def platform_list(request):
 #     platforms = Platform.objects.annotate(games_count=Count('games'))
 #     return render(request, 'platform_list.html', {'platforms': platforms})
+
+
+class SignUpView(CreateView):
+    form_class = UserCreationForm
+    template_name = 'registration/signup.html'
+    success_url = reverse_lazy('login')
+
+
+class StaffRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
+    def test_func(self):
+        return self.request.user.is_staff or self.request.user.is_superuser
+
+
+class OwnerOrStaffRequiredMixin(StaffRequiredMixin):
+    def test_func(self):
+        if super().test_func():
+            return True
+        obj = self.get_object()
+        return obj.owner == self.request.user
 
 
 class GameListView(ListView):
@@ -86,19 +107,19 @@ class GameDetailView(DetailView):
         return context
 
 
-class GameCreateView(CreateView):
+class GameCreateView(StaffRequiredMixin, CreateView):
     model = Game
     fields = ['name', 'platforms']
     template_name = 'games/game_form.html'
 
 
-class GameUpdateView(UpdateView):
+class GameUpdateView(StaffRequiredMixin, UpdateView):
     model = Game
     fields = ['name', 'platforms']
     template_name = 'games/game_form.html'
 
 
-class GameDeleteView(DeleteView):
+class GameDeleteView(StaffRequiredMixin, DeleteView):
     model = Game
     template_name = 'games/game_confirm_delete.html'
     success_url = reverse_lazy('game_list')
@@ -110,27 +131,60 @@ class PlatformListView(ListView):
     context_object_name = 'platforms'
 
 
-class PlatformCreateView(CreateView):
+class PlatformCreateView(StaffRequiredMixin, CreateView):
     model = Platform
     fields = ['name']
     template_name = 'games/platform_form.html'
     success_url = reverse_lazy('platform_list')
 
 
-class PlatformUpdateView(UpdateView):
+class PlatformUpdateView(StaffRequiredMixin, UpdateView):
     model = Platform
     fields = ['name']
     template_name = 'games/platform_form.html'
     success_url = reverse_lazy('platform_list')
 
 
-class PlatformDeleteView(DeleteView):
+class PlatformDeleteView(StaffRequiredMixin, DeleteView):
     model = Platform
     template_name = 'games/platform_confirm_delete.html'
     success_url = reverse_lazy('platform_list')
 
 
-class ReviewCreateView(CreateView):
+class MyReviewsView(LoginRequiredMixin, ListView):
+    model = Review
+    template_name = 'games/my_reviews.html'
+    context_object_name = 'reviews'
+    paginate_by = 10
+
+    def get_queryset(self):
+        qs = (
+            Review.objects.filter(owner=self.request.user)
+            .select_related('game')
+            .order_by('-created_at')
+        )
+
+        search_query = self.request.GET.get('q')
+        if search_query:
+            qs = qs.filter(game__name__icontains=search_query)
+
+        status = self.request.GET.get('status')
+        if status:
+            qs = qs.filter(status=status)
+
+        min_rating = self.request.GET.get('min_rating')
+        if min_rating:
+            qs = qs.filter(rating__gte=min_rating)
+
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['status_choices'] = Review.StatusChoices.choices
+        return context
+
+
+class ReviewCreateView(LoginRequiredMixin, CreateView):
     model = Review
     fields = ['rating', 'status', 'comment']
     template_name = 'games/review_form.html'
@@ -138,6 +192,7 @@ class ReviewCreateView(CreateView):
     def form_valid(self, form):
         game = get_object_or_404(Game, pk=self.kwargs['game_pk'])
         form.instance.game = game
+        form.instance.owner = self.request.user
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
@@ -146,13 +201,14 @@ class ReviewCreateView(CreateView):
         return context
 
 
-class ReviewUpdateView(UpdateView):
+class ReviewUpdateView(OwnerOrStaffRequiredMixin, UpdateView):
     model = Review
     fields = ['rating', 'status', 'comment']
     template_name = 'games/review_form.html'
 
 
-class ReviewDeleteView(DeleteView):
+
+class ReviewDeleteView(OwnerOrStaffRequiredMixin, DeleteView):
     model = Review
     template_name = 'games/review_confirm_delete.html'
 
