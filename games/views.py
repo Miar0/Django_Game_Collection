@@ -3,6 +3,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db.models import Avg, Count
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
+from django.contrib.messages.views import SuccessMessageMixin
 from django.views.generic import (
     CreateView,
     DeleteView,
@@ -184,10 +185,11 @@ class MyReviewsView(LoginRequiredMixin, ListView):
         return context
 
 
-class ReviewCreateView(LoginRequiredMixin, CreateView):
+class ReviewCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     model = Review
     fields = ['rating', 'status', 'comment']
     template_name = 'games/review_form.html'
+    success_message = "Відгук успішно створено!"
 
     def form_valid(self, form):
         game = get_object_or_404(Game, pk=self.kwargs['game_pk'])
@@ -201,10 +203,11 @@ class ReviewCreateView(LoginRequiredMixin, CreateView):
         return context
 
 
-class ReviewUpdateView(OwnerOrStaffRequiredMixin, UpdateView):
+class ReviewUpdateView(OwnerOrStaffRequiredMixin, SuccessMessageMixin, UpdateView):
     model = Review
     fields = ['rating', 'status', 'comment']
     template_name = 'games/review_form.html'
+    success_message = "Відгук успішно оновлено!"
 
 
 
